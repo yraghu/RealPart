@@ -5,6 +5,7 @@
   <author>
     <name>null</name>
   </author>
+  <description>Takes the real part of a given set of input data and outputs the result</description>
   <propertyfile type="PRF">
     <localfile name="RealPart.prf.xml"/>
   </propertyfile>
