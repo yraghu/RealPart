@@ -163,25 +163,33 @@ int RealPart_i::serviceFunction()
 	bulkio::InFloatPort::dataTransfer *tmp = float_in->getPacket(bulkio::Const::BLOCKING);
 	if (not tmp) { // No data is available
 		return NOOP;
-}
+	}
 
 	vector<float> *outputData;
+
+	//Checks if data is complex, and if so, takes the real part and stores in outputData
 	if(tmp->SRI.mode)
 	{
 		unsigned int inputLength = tmp->dataBuffer.size();
+
+		//Performs modulus division on length by 2. Given data that is complex, result should be zero
+		//If result is not 0, one less element will be processed
 		if(inputLength % 2 != 0)
 		{
-			std::cout << "WARNING - SRI mode is set to true, but input data length is not even..." << std::endl;
-			std::cout << "Processing one less element" << std::endl;
+			LOG_WARN(RealPart_i, "WARNING - SRI mode is set to true, but input data length is not even...\nProcessing one less element");
 			inputLength--;
 		}
-		data.resize(inputLength/2);
+		data.resize(inputLength/2);	//Cuts length of data vector in half so that it is the appropriate size for real part of data
+
+		//Iterates through the data and assigns every other value (those corresponding to the real part)
+		//to each element of data
 		for(unsigned int i=0;i<inputLength/2;i++)
 		{
 			data[i] = (float)tmp->dataBuffer[i*2];
 		}
 		outputData = &data;
 	}
+	//If data is already purely real, set output data equal to input data
 	else
 		outputData = &(tmp->dataBuffer);
 
