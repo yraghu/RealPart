@@ -24,8 +24,8 @@ class RealPart_base : public Resource_impl, protected ThreadedComponent
     protected:
 
         // Ports
-        bulkio::InFloatPort *float_in;
-        bulkio::OutFloatPort *float_out;
+        bulkio::InFloatPort *dataFloat_in;
+        bulkio::OutFloatPort *dataFloat_out;
 
     private:
 };

@@ -5,7 +5,7 @@
   <author>
     <name>null</name>
   </author>
-  <description>Takes the real part of a given set of input data and outputs the result</description>
+  <description>Takes the real part of a given set of input data and outputs the result. Given a complex input, only the real part is returned, and given a real input, the data is passed through.</description>
   <propertyfile type="PRF">
     <localfile name="RealPart.prf.xml"/>
   </propertyfile>
