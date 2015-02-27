@@ -85,8 +85,8 @@ class ResourceTests(ossie.utils.testing.ScaComponentTestCase):
     #   ossie.utils.bulkio.bulkio_helpers,
     #   ossie.utils.bluefile.bluefile_helpers
     # for modules that will assist with testing resource with BULKIO ports
-    def testFunctionality(self):
-        print "Testing Functionality"
+    def testFunctionalityComplex(self):
+        print "Testing Functionality for Complex Input"
         inputData = [complex(float(x+1), -float(x)) for x in xrange(100)]
         self.src.push(inputData)
         
@@ -103,6 +103,25 @@ class ResourceTests(ossie.utils.testing.ScaComponentTestCase):
 
         for x in xrange(len(outData)):
             self.assertEquals(outData[x], inputData[x].real)
+            
+    def testFunctionalityReal(self):
+        print "Testing Functionality for Real Input"
+        inputData = [float(x) for x in xrange(100)]
+        self.src.push(inputData)
+        
+        outData = []
+        count = 0
+        while True:
+            outData = self.sink.getData()
+            if outData:
+                break
+            if count == 100:
+                break;
+            sleep(.01)
+            count+=1
+
+        for x in xrange(len(outData)):
+            self.assertEquals(outData[x], inputData[x])
         
 
 if __name__ == "__main__":

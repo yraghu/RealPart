@@ -1,11 +1,19 @@
-/**************************************************************************
-
-    This is the component code. This file contains the child class where
-    custom functionality can be added to the component. Custom
-    functionality to the base class can be extended here. Access to
-    the ports can also be done from this class
-
-**************************************************************************/
+/**
+* Copyright (C) 2013 Axios, Inc.
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "RealPart.h"
 
@@ -159,8 +167,7 @@ RealPart_i::~RealPart_i()
 ************************************************************************************************/
 int RealPart_i::serviceFunction()
 {
-	LOG_DEBUG(RealPart_i, "serviceFunction() example log message");
-	bulkio::InFloatPort::dataTransfer *tmp = float_in->getPacket(bulkio::Const::BLOCKING);
+	bulkio::InFloatPort::dataTransfer *tmp = dataFloat_in->getPacket(bulkio::Const::BLOCKING);
 	if (not tmp) { // No data is available
 		return NOOP;
 	}
@@ -168,7 +175,7 @@ int RealPart_i::serviceFunction()
 	vector<float> *outputData;
 
 	//Checks if data is complex, and if so, takes the real part and stores in outputData
-	if(tmp->SRI.mode)
+	if(COMPLEX)
 	{
 		unsigned int inputLength = tmp->dataBuffer.size();
 
@@ -176,17 +183,17 @@ int RealPart_i::serviceFunction()
 		//If result is not 0, one less element will be processed
 		if(inputLength % 2 != 0)
 		{
-			LOG_WARN(RealPart_i, "WARNING - SRI mode is set to true, but input data length is not even...\nProcessing one less element");
+			LOG_ERROR(RealPart_i, "ERROR - SRI mode is set to true, but input data length is not even...\nProcessing one less element");
 			inputLength--;
 		}
-		data.resize(inputLength/2);	//Cuts length of data vector in half so that it is the appropriate size for real part of data
+		//data.resize(inputLength/2);	//Cuts length of data vector in half so that it is the appropriate size for real part of data
 
 		//Iterates through the data and assigns every other value (those corresponding to the real part)
 		//to each element of data
-		for(unsigned int i=0;i<inputLength/2;i++)
-		{
-			data[i] = (float)tmp->dataBuffer[i*2];
-		}
+		for(it = tmp->dataBuffer.begin();it != tmp->dataBuffer.end();it+=2)
+			data.push_back(*it);
+			//data.insert(data.end(), *it)
+
 		outputData = &data;
 	}
 	//If data is already purely real, set output data equal to input data
@@ -194,11 +201,16 @@ int RealPart_i::serviceFunction()
 		outputData = &(tmp->dataBuffer);
 
 	BULKIO::StreamSRI sri = tmp->SRI;
-	sri.mode = false;
+	COMPLEX = false;
 
 	// NOTE: You must make at least one valid pushSRI call
-	float_out->pushSRI(sri);
-	float_out->pushPacket(*outputData, tmp->T, tmp->EOS, tmp->streamID);
+	if(tmp->sriChanged || (dataFloat_out->getCurrentSRI().count(tmp->streamID)==0))
+		dataFloat_out->pushSRI(sri);
+
+	if(tmp->inputQueueFlushed)
+		LOG_WARN(RealPart_i, "WARNING - Input Queue Flushed");
+
+	dataFloat_out->pushPacket(*outputData, tmp->T, tmp->EOS, tmp->streamID);
 
 	delete tmp; // IMPORTANT: MUST RELEASE THE RECEIVED DATA BLOCK
 	return NORMAL;
