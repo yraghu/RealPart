@@ -183,8 +183,8 @@ int RealPart_i::serviceFunction()
 		//If result is not 0, one less element will be processed
 		if(inputLength % 2 != 0)
 		{
-			LOG_ERROR(RealPart_i, "ERROR - SRI mode is set to true, but input data length is not even...\nProcessing one less element");
-			inputLength--;
+			LOG_ERROR(RealPart_i, "ERROR - SRI mode is set to true, but input data length is not even");
+			return NOOP;
 		}
 		//data.resize(inputLength/2);	//Cuts length of data vector in half so that it is the appropriate size for real part of data
 
@@ -192,10 +192,10 @@ int RealPart_i::serviceFunction()
 		//to each element of data
 		for(it = tmp->dataBuffer.begin();it != tmp->dataBuffer.end();it+=2)
 			data.push_back(*it);
-			//data.insert(data.end(), *it)
 
 		outputData = &data;
 	}
+
 	//If data is already purely real, set output data equal to input data
 	else
 		outputData = &(tmp->dataBuffer);
